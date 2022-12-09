@@ -1,9 +1,11 @@
 import Div100vh from "react-div-100vh";
 import useDollar from "./hooks/useDollar";
+import useThemeContext from "./hooks/useThemeContext";
 import {
   Container,
   Title,
   Button,
+  ActionIcon,
   TextInput,
   Loader,
   Text,
@@ -11,10 +13,11 @@ import {
 } from "@mantine/core";
 import { FaMoneyBill, FaMoneyBillWave, FaCoins } from "react-icons/fa";
 import { IoReload } from "react-icons/io5";
-
+import { FiMoon, FiSun } from "react-icons/fi";
 import { useState } from "react";
 
 function App() {
+  const { currentTheme, toggle } = useThemeContext();
   const { data, error, isLoading, isValidating, mutate } = useDollar();
   const [totalBs, setTotalBs] = useState(0);
 
@@ -34,6 +37,17 @@ function App() {
         width: "100%",
       }}
     >
+      <ActionIcon
+        onClick={toggle}
+        variant="default"
+        sx={{
+          position: "absolute",
+          top: "12px",
+          right: "12px",
+        }}
+      >
+        {currentTheme === "dark" ? <FiSun size={16} /> : <FiMoon size={16} />}
+      </ActionIcon>
       <Container size={500} mx="auto" sx={{ width: "100%" }}>
         <Title
           mb={15}
@@ -55,14 +69,17 @@ function App() {
             mt={14}
             mr={5}
             leftIcon={isValidating ? <Loader size={20} /> : <IoReload />}
-            variant="light"
+            variant={currentTheme === "dark" ? "light" : "filled"}
             onClick={mutate}
             disabled={isLoading || isValidating}
           >
             Actualizar
           </Button>
           <TextInput
-            sx={{ width: "100%" }}
+            sx={{
+              width: "100%",
+              borderColor: "#9b9b9b !important",
+            }}
             aria-label="Valor actual dolar"
             label="Valor actual dolar ($)"
             rightSection={
