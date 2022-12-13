@@ -11,21 +11,36 @@ import {
   Text,
   Flex,
 } from "@mantine/core";
-import { FaMoneyBill, FaMoneyBillWave, FaCoins } from "react-icons/fa";
+import { FaMoneyBill } from "react-icons/fa";
 import { IoReload } from "react-icons/io5";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { TbArrowsLeftRight } from "react-icons/tb";
 import { useState } from "react";
+import DollarsToBolivares from "./components/DollarsToBolivares";
+import BolivaresToDollars from "./components/BolivaresToDollars";
+import ErrorText from "./components/ErrorText";
 
 function App() {
+  const [toggleExchange, setToggleExchange] = useState(true);
   const { currentTheme, toggle } = useThemeContext();
   const { data, error, isLoading, isValidating, mutate } = useDollar();
   const [totalBs, setTotalBs] = useState(0);
+  const [totalDollars, setTotalDollars] = useState(0);
 
-  const onChange = (e) => {
+  const onDollarsToBolivares = (e) => {
     if (!e.target.value.trim()) return setTotalBs(0);
+
     const n = e.target.valueAsNumber * Number.parseFloat(data?.dollar);
     const bs = parseFloat(n).toFixed(2);
     setTotalBs(bs);
+  };
+
+  const onBolivaresToDollars = (e) => {
+    if (!e.target.value.trim()) return setTotalBs(0);
+
+    const n = e.target.valueAsNumber / Number.parseFloat(data?.dollar);
+    const dollars = parseFloat(n).toFixed(2);
+    setTotalDollars(dollars);
   };
 
   return (
@@ -57,16 +72,22 @@ function App() {
           Convertidor
         </Title>
 
-        <Text sx={{ textTransform: "capitalize" }} c="dimmed" fz="small" mb={2}>
+        <Text
+          sx={{ textTransform: "capitalize", textAlign: "center" }}
+          c="dimmed"
+          mb={3}
+          fw={700}
+        >
           {data?.date}
         </Text>
-        <Text c="dimmed" fz="small" mb={15}>
+        <Text c="dimmed" mb={15} sx={{ textAlign: "center" }}>
           Datos obtenidos desde MonitorToday ({data?.url})
         </Text>
 
         <Flex align="center">
           <Button
-            mt={14}
+            size="md"
+            mt={15}
             mr={5}
             leftIcon={isValidating ? <Loader size={20} /> : <IoReload />}
             variant={currentTheme === "dark" ? "light" : "filled"}
@@ -75,7 +96,9 @@ function App() {
           >
             Actualizar
           </Button>
+
           <TextInput
+            size="md"
             sx={{
               width: "100%",
               borderColor: "#9b9b9b !important",
@@ -85,35 +108,36 @@ function App() {
             rightSection={
               isLoading || isValidating ? <Loader size={20} /> : <FaMoneyBill />
             }
-            disabled={isLoading || isValidating}
             placeholder={isLoading ? "Cargando..." : ""}
-            defaultValue={isLoading ? "" : data?.dollar}
+            value={isLoading ? "" : data?.dollar}
             mb={10}
+            readOnly
           />
         </Flex>
 
-        <TextInput
-          aria-label="Cantidad para convertir"
-          label="Cantidad para convertir"
-          rightSection={<FaCoins />}
-          placeholder="Escriba la cantidad de bolivares para convertir"
-          type="number"
+        <ErrorText isVisible={!!error} text={error?.message} />
+
+        {toggleExchange ? (
+          <DollarsToBolivares
+            {...{ isLoading, onDollarsToBolivares, isValidating, totalBs }}
+          />
+        ) : (
+          <BolivaresToDollars
+            {...{ isLoading, onBolivaresToDollars, isValidating, totalDollars }}
+          />
+        )}
+
+        <Button
+          size="md"
+          aria-label="Alternar Conversión"
+          mt={20}
+          rightIcon={<TbArrowsLeftRight />}
+          onClick={() => setToggleExchange((f) => !f)}
           disabled={isLoading || isValidating}
-          onChange={isLoading ? null : onChange}
-          mb={10}
-        />
-
-        <TextInput
-          aria-label="Conversión bolívar"
-          label="Conversión bolívar (Bs)"
-          rightSection={<FaMoneyBillWave />}
-          readOnly
-          value={totalBs}
-        />
-
-        {/* <Button aria-label="Alternar Conversión" mt={20} fullWidth>
+          fullWidth
+        >
           Alternar Conversión
-        </Button> */}
+        </Button>
       </Container>
     </Div100vh>
   );
