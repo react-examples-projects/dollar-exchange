@@ -7,9 +7,11 @@ import {
   Button,
   ActionIcon,
   TextInput,
+  Skeleton,
   Loader,
   Text,
   Flex,
+  Box,
 } from "@mantine/core";
 import { FaMoneyBill } from "react-icons/fa";
 import { IoReload } from "react-icons/io5";
@@ -71,18 +73,34 @@ function App() {
         >
           Convertidor
         </Title>
-
-        <Text
-          sx={{ textTransform: "capitalize", textAlign: "center" }}
-          c="dimmed"
-          mb={3}
-          fw={700}
-        >
-          {data?.date}
-        </Text>
-        <Text c="dimmed" mb={15} sx={{ textAlign: "center" }}>
-          Datos obtenidos desde MonitorToday ({data?.url})
-        </Text>
+        {isLoading || isValidating ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+            mb={15}
+          >
+            <Skeleton height={18} mt={6} width="285px" radius="xl" />
+            <Skeleton height={18} mt={6} width="285px" radius="xl" />
+            <Skeleton height={18} mt={6} width="275px" radius="xl" />
+          </Box>
+        ) : (
+          <>
+            <Text
+              sx={{ textTransform: "capitalize", textAlign: "center" }}
+              c="dimmed"
+              mb={3}
+              fw={700}
+            >
+              {data?.date}
+            </Text>
+            <Text c="dimmed" mb={15} sx={{ textAlign: "center" }}>
+              Datos obtenidos desde MonitorToday ({data?.url})
+            </Text>
+          </>
+        )}
 
         <Flex align="center">
           <Button

@@ -9,9 +9,9 @@ export default function DollarsToBolivares({ isLoading, onDollarsToBolivares, is
       <TextInput
         size="md"
         aria-label="Cantidad para convertir"
-        label="Cantidad para convertir"
+        label="Cantidad para convertir ($)"
         rightSection={<FaCoins />}
-        placeholder="Escriba la cantidad de bolivares para convertir"
+        placeholder="Escriba la cantidad de dólares para convertir"
         type="number"
         disabled={isLoading || isValidating}
         onChange={isLoading ? null : onDollarsToBolivares}
