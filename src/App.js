@@ -82,9 +82,8 @@ function App() {
             }}
             mb={15}
           >
-            <Skeleton height={18} mt={6} width="285px" radius="xl" />
-            <Skeleton height={18} mt={6} width="285px" radius="xl" />
-            <Skeleton height={18} mt={6} width="275px" radius="xl" />
+            <Skeleton height={18} mt={6} width="270px" radius="xl" />
+            <Skeleton height={18} mt={6} width="375px" radius="xl" />
           </Box>
         ) : (
           <>
@@ -97,7 +96,7 @@ function App() {
               {data?.date}
             </Text>
             <Text c="dimmed" mb={15} sx={{ textAlign: "center" }}>
-              Datos obtenidos desde MonitorToday ({data?.url})
+              Datos obtenidos desde BCV ({data?.url})
             </Text>
           </>
         )}
