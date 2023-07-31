@@ -12,37 +12,58 @@ import {
   Text,
   Flex,
   Box,
+  Badge,
+  CopyButton,
 } from "@mantine/core";
 import { FaMoneyBill } from "react-icons/fa";
+import { BiRefresh } from "react-icons/bi";
 import { IoReload } from "react-icons/io5";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { TbArrowsLeftRight } from "react-icons/tb";
-import { useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 import DollarsToBolivares from "./components/DollarsToBolivares";
 import BolivaresToDollars from "./components/BolivaresToDollars";
 import ErrorText from "./components/ErrorText";
+import { bolivaresToDollar, dollarsToBs } from "./helpers/utils";
 
 function App() {
+  const matches = useMediaQuery("(max-width: 470px)");
   const [toggleExchange, setToggleExchange] = useState(true);
   const { currentTheme, toggle } = useThemeContext();
   const { data, error, isLoading, isValidating, mutate } = useDollar();
+  const [bs, setBs] = useState(0);
+  const [dollars, setDollars] = useState(0);
   const [totalBs, setTotalBs] = useState(0);
   const [totalDollars, setTotalDollars] = useState(0);
+  const [dollar, setDollar] = useState(null);
+  const [showCopyButton, setShowCopyButton] = useState(false);
+
+  useEffect(() => {
+    if (data?.dollar) setDollar(data?.dollar);
+  }, [data?.dollar]);
 
   const onDollarsToBolivares = (e) => {
     if (!e.target.value.trim()) return setTotalBs(0);
-
-    const n = e.target.valueAsNumber * Number.parseFloat(data?.dollar);
-    const bs = parseFloat(n).toFixed(2);
-    setTotalBs(bs);
+    setBs(e.target.valueAsNumber);
+    setTotalBs(dollarsToBs(e.target.valueAsNumber, dollar));
   };
 
   const onBolivaresToDollars = (e) => {
     if (!e.target.value.trim()) return setTotalBs(0);
+    setDollars(e.target.valueAsNumber);
+    setTotalDollars(bolivaresToDollar(e.target.valueAsNumber, dollar));
+  };
 
-    const n = e.target.valueAsNumber / Number.parseFloat(data?.dollar);
-    const dollars = parseFloat(n).toFixed(2);
-    setTotalDollars(dollars);
+  const onChangeDollarValue = (e) => {
+    setDollar(e.target.valueAsNumber);
+    if (toggleExchange) {
+      const bolivares = dollarsToBs(bs, e.target.valueAsNumber);
+      setTotalBs(bolivares);
+    } else {
+      const _dollars = bolivaresToDollar(e.target.valueAsNumber, dollars);
+      setTotalDollars(_dollars);
+    }
   };
 
   return (
@@ -65,14 +86,16 @@ function App() {
       >
         {currentTheme === "dark" ? <FiSun size={16} /> : <FiMoon size={16} />}
       </ActionIcon>
+
       <Container size={500} mx="auto" sx={{ width: "100%" }}>
         <Title
           mb={15}
-          sx={{ textAlign: "center", fontWeight: "bolder", fontSize: "2.5rem" }}
+          sx={{ textAlign: "center", fontWeight: "bolder", fontSize: "2rem" }}
           order={1}
         >
           Convertidor
         </Title>
+
         {isLoading || isValidating ? (
           <Box
             sx={{
@@ -101,18 +124,101 @@ function App() {
           </>
         )}
 
-        <Flex align="center">
-          <Button
-            size="md"
-            mt={15}
-            mr={5}
-            leftIcon={isValidating ? <Loader size={20} /> : <IoReload />}
-            variant={currentTheme === "dark" ? "light" : "filled"}
-            onClick={mutate}
-            disabled={isLoading || isValidating}
+        <Box
+          sx={{ width: "100%", position: "relative" }}
+          mt={40}
+          mb={matches ? 50 : 20}
+          onMouseEnter={() => setShowCopyButton(true)}
+          onMouseLeave={() => setShowCopyButton(false)}
+        >
+          <Box
+            style={{
+              display: showCopyButton ? "block" : "none",
+              position: "absolute",
+              top: "85%",
+              transform: "translateY(-85%)",
+              right: 38,
+              zIndex: 5,
+            }}
           >
-            Actualizar
-          </Button>
+            <CopyButton value={dollar}>
+              {({ copied, copy }) => (
+                <Button
+                  color={copied ? "teal" : "blue"}
+                  onClick={copy}
+                  size="xs"
+                  radius="md"
+                  variant="light"
+                >
+                  {copied ? "Valor copiado" : "Copiar valor"}
+                </Button>
+              )}
+            </CopyButton>
+          </Box>
+
+          <Flex
+            align="center"
+            mt={5}
+            justify="flex-end"
+            style={{
+              position: "absolute",
+              top: matches ? 66 : -10,
+              right: 0,
+              zIndex: 5,
+            }}
+          >
+            <Badge
+              color="gray"
+              radius="xs"
+              variant="filled"
+              mr={6}
+              size="lg"
+              onClick={isLoading || isValidating ? null : mutate}
+              style={{
+                cursor: "pointer",
+                opacity: isLoading || isValidating ? 0.4 : 1,
+              }}
+            >
+              <Text
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  fontWeight: "normal",
+                  textTransform: "capitalize",
+                }}
+              >
+                <BiRefresh style={{ fontSize: "15px" }} />
+                Actualizar
+              </Text>
+            </Badge>
+            <Badge
+              color="gray"
+              radius="xs"
+              variant="filled"
+              size="lg"
+              style={{
+                cursor: "pointer",
+                opacity: isLoading || isValidating ? 0.4 : 1,
+              }}
+              onClick={
+                isLoading || isValidating ? null : () => setDollar(data?.dollar)
+              }
+            >
+              <Text
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  fontWeight: "normal",
+                  textTransform: "capitalize",
+                }}
+              >
+                <IoReload />
+                Reiniciar valor
+              </Text>
+            </Badge>
+          </Flex>
 
           <TextInput
             size="md"
@@ -120,17 +226,19 @@ function App() {
               width: "100%",
               borderColor: "#9b9b9b !important",
             }}
+            type="number"
             aria-label="Valor actual dolar"
             label="Valor actual dolar ($)"
             rightSection={
               isLoading || isValidating ? <Loader size={20} /> : <FaMoneyBill />
             }
             placeholder={isLoading ? "Cargando..." : ""}
-            value={isLoading ? "" : data?.dollar}
+            value={isLoading ? "Cargando..." : dollar || 0}
+            onChange={onChangeDollarValue}
+            readOnly={isLoading || isValidating}
             mb={10}
-            readOnly
           />
-        </Flex>
+        </Box>
 
         <ErrorText isVisible={!!error} text={error?.message} />
 
@@ -147,10 +255,11 @@ function App() {
         <Button
           size="md"
           aria-label="Alternar Conversión"
-          mt={20}
+          mt={12}
           rightIcon={<TbArrowsLeftRight />}
           onClick={() => setToggleExchange((f) => !f)}
           disabled={isLoading || isValidating}
+          variant="light"
           fullWidth
         >
           Alternar Conversión

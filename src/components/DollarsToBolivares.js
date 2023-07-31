@@ -25,7 +25,8 @@ export default function DollarsToBolivares({ isLoading, onDollarsToBolivares, is
         rightSection={<FaMoneyBillWave />}
         readOnly
         value={totalBs}
+        disabled={isLoading || isValidating}
       />
     </>
-  )
+  );
 }
