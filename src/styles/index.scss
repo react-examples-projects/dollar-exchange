@@ -6,4 +6,22 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+.mantine-InputWrapper-label {
+  margin-bottom: 0.25rem;
+}
+
+.btn-pill {
+  cursor: pointer;
+  transition: background-color 50ms ease;
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:hover {
+    background-color: #282b2f;
+  }
 }

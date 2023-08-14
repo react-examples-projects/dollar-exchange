@@ -1,10 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { MantineProvider } from "@mantine/core";
 import useThemeContext from "./hooks/useThemeContext";
 import ThemeProvider from "./context/ThemeProvider";
-import "./index.css";
+import { MantineProvider } from "@mantine/core";
+import { Toaster } from "react-hot-toast";
+
+import "./styles/index.scss";
 import "inter-ui/inter.css";
 
 function Main() {
@@ -30,6 +32,7 @@ root.render(
   <React.StrictMode>
     <ThemeProvider>
       <Main />
+      <Toaster position="bottom-right" />
     </ThemeProvider>
   </React.StrictMode>
 );

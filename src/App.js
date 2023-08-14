@@ -21,14 +21,17 @@ import { IoReload } from "react-icons/io5";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { TbArrowsLeftRight } from "react-icons/tb";
 import { useMediaQuery } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { bolivaresToDollar, dollarsToBs } from "./helpers/utils";
 import DollarsToBolivares from "./components/DollarsToBolivares";
 import BolivaresToDollars from "./components/BolivaresToDollars";
 import ErrorText from "./components/ErrorText";
-import { bolivaresToDollar, dollarsToBs } from "./helpers/utils";
+import toast from "react-hot-toast";
+import animeGif from "./assets/anime.gif";
 
 function App() {
   const matches = useMediaQuery("(max-width: 470px)");
+  const isCopied = useRef(false);
   const [toggleExchange, setToggleExchange] = useState(true);
   const { currentTheme, toggle } = useThemeContext();
   const { data, error, isLoading, isValidating, mutate } = useDollar();
@@ -105,8 +108,26 @@ function App() {
             }}
             mb={15}
           >
-            <Skeleton height={18} mt={6} width="270px" radius="xl" />
-            <Skeleton height={18} mt={6} width="375px" radius="xl" />
+            <Skeleton
+              height={18}
+              mt={6}
+              width={matches ? "calc(100% - 11rem)" : "270px"}
+              radius="xl"
+            />
+            <Skeleton
+              height={18}
+              mt={6}
+              width={matches ? "calc(100% - 6rem)" : "375px"}
+              radius="xl"
+            />
+            {matches && (
+              <Skeleton
+                height={18}
+                mt={6}
+                width={matches ? "calc(100% - 10rem)" : "375px"}
+                radius="xl"
+              />
+            )}
           </Box>
         ) : (
           <>
@@ -131,30 +152,63 @@ function App() {
           onMouseEnter={() => setShowCopyButton(true)}
           onMouseLeave={() => setShowCopyButton(false)}
         >
-          <Box
-            style={{
-              display: showCopyButton ? "block" : "none",
-              position: "absolute",
-              top: "85%",
-              transform: "translateY(-85%)",
-              right: 38,
-              zIndex: 5,
-            }}
-          >
-            <CopyButton value={dollar}>
-              {({ copied, copy }) => (
-                <Button
-                  color={copied ? "teal" : "blue"}
-                  onClick={copy}
-                  size="xs"
-                  radius="md"
-                  variant="light"
-                >
-                  {copied ? "Valor copiado" : "Copiar valor"}
-                </Button>
-              )}
-            </CopyButton>
-          </Box>
+          {!isLoading && !isValidating && (
+            <Box
+              style={{
+                display: showCopyButton ? "block" : "none",
+                position: "absolute",
+                top: "85%",
+                transform: "translateY(-85%)",
+                right: 38,
+                zIndex: 5,
+              }}
+            >
+              <CopyButton value={dollar}>
+                {({ copied, copy }) => {
+                  if (copied && !isCopied.current) {
+                    isCopied.current = true;
+                    toast.custom(
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          backgroundColor: "#25262b",
+                          padding: "0.8rem 1.2rem",
+                          borderRadius: "5px",
+                          border: "1px solid #373A40",
+                        }}
+                      >
+                        <img
+                          src={animeGif}
+                          alt="anime gif"
+                          width={40}
+                          height={40}
+                        />
+                        <Text mt={3}>Se ha copiado el valor de la divisa</Text>
+                      </Box>
+                    );
+                  } else {
+                    if (isCopied.current) {
+                      isCopied.current = false;
+                    }
+                  }
+
+                  return (
+                    <Button
+                      color={copied ? "teal" : "blue"}
+                      onClick={copy}
+                      size="xs"
+                      radius="md"
+                      variant="light"
+                    >
+                      {copied ? "Valor copiado" : "Copiar valor"}
+                    </Button>
+                  );
+                }}
+              </CopyButton>
+            </Box>
+          )}
 
           <Flex
             align="center"
@@ -162,12 +216,13 @@ function App() {
             justify="flex-end"
             style={{
               position: "absolute",
-              top: matches ? 66 : -10,
+              top: matches ? 72 : -10,
               right: 0,
               zIndex: 5,
             }}
           >
             <Badge
+              className="btn-pill"
               color="gray"
               radius="xs"
               variant="filled"
@@ -192,7 +247,9 @@ function App() {
                 Actualizar
               </Text>
             </Badge>
+
             <Badge
+              className="btn-pill"
               color="gray"
               radius="xs"
               variant="filled"
@@ -227,8 +284,8 @@ function App() {
               borderColor: "#9b9b9b !important",
             }}
             type="number"
-            aria-label="Valor actual dolar"
-            label="Valor actual dolar ($)"
+            aria-label="Valor actual del dólar"
+            label="Valor actual del dólar"
             rightSection={
               isLoading || isValidating ? <Loader size={20} /> : <FaMoneyBill />
             }
@@ -259,7 +316,8 @@ function App() {
           rightIcon={<TbArrowsLeftRight />}
           onClick={() => setToggleExchange((f) => !f)}
           disabled={isLoading || isValidating}
-          variant="light"
+          variant="gradient"
+          gradient={{ from: "indigo", to: "cyan" }}
           fullWidth
         >
           Alternar Conversión
