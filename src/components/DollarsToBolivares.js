@@ -1,9 +1,12 @@
-import {
-  TextInput,
-} from "@mantine/core";
+import { TextInput } from "@mantine/core";
 import { FaMoneyBillWave, FaCoins } from "react-icons/fa";
 
-export default function DollarsToBolivares({ isLoading, onDollarsToBolivares, isValidating, totalBs }) {
+export default function DollarsToBolivares({
+  isLoading,
+  onDollarsToBolivares,
+  isValidating,
+  totalBs,
+}) {
   return (
     <>
       <TextInput

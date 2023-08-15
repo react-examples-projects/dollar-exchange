@@ -28,6 +28,7 @@ import BolivaresToDollars from "./components/BolivaresToDollars";
 import ErrorText from "./components/ErrorText";
 import toast from "react-hot-toast";
 import animeGif from "./assets/anime.gif";
+import { getDollarPrice, setDollarPrice } from "./helpers/storage";
 
 function App() {
   const matches = useMediaQuery("(max-width: 470px)");
@@ -43,7 +44,14 @@ function App() {
   const [showCopyButton, setShowCopyButton] = useState(false);
 
   useEffect(() => {
-    if (data?.dollar) setDollar(data?.dollar);
+    if (data?.dollar) {
+      setDollar(data.dollar);
+
+      const oldDollarValue = getDollarPrice();
+      if (oldDollarValue !== Number.parseFloat(data.dollar)) {
+        setDollarPrice(data.dollar);
+      }
+    }
   }, [data?.dollar]);
 
   const onDollarsToBolivares = (e) => {
@@ -64,7 +72,8 @@ function App() {
       const bolivares = dollarsToBs(bs, e.target.valueAsNumber);
       setTotalBs(bolivares);
     } else {
-      const _dollars = bolivaresToDollar(e.target.valueAsNumber, dollars);
+      const _dollars = bolivaresToDollar(dollars, e.target.valueAsNumber);
+      console.log({ _dollars });
       setTotalDollars(_dollars);
     }
   };
@@ -188,19 +197,18 @@ function App() {
                         <Text mt={3}>Se ha copiado el valor de la divisa</Text>
                       </Box>
                     );
-                  } else {
-                    if (isCopied.current) {
-                      isCopied.current = false;
-                    }
+                  } else if (isCopied.current) {
+                    isCopied.current = false;
                   }
 
                   return (
                     <Button
                       color={copied ? "teal" : "blue"}
-                      onClick={copy}
+                      onClick={copied ? null : copy}
                       size="xs"
                       radius="md"
                       variant="light"
+                      disabled={copied}
                     >
                       {copied ? "Valor copiado" : "Copiar valor"}
                     </Button>
